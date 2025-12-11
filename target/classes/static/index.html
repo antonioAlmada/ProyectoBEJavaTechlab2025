@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechLab 2025 - Gestión Comercial</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --danger-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12; /* Nuevo color para edición */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            height: 100vh;
+            padding-top: 20px;
+            position: fixed;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background-color: var(--secondary-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h1 { color: var(--primary-color); }
+
+        /* Forms & Containers */
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            max-width: 800px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Buttons */
+        button.action-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button.action-btn:hover { background-color: #2980b9; }
+
+        button.edit-btn {
+            background-color: var(--warning-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 5px;
+        }
+        button.edit-btn:hover { background-color: #d68910; }
+
+        button.delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button.delete-btn:hover { background-color: #c0392b; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:hover { background-color: #f8f8f8; }
+
+        /* Messages Box */
+        #messageBox {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        /* Search Result Styling */
+        #resultadoBusqueda {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .busqueda-item {
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .busqueda-item:last-child {
+            border-bottom: none;
+        }
+        .busqueda-item strong {
+            display: inline-block;
+            width: 100px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Global Message Box -->
+<div id="messageBox"></div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>TechLab 2025</h2>
+    <button class="nav-btn active" onclick="showSection('productos')">📦 Productos</button>
+    <button class="nav-btn" onclick="showSection('clientes')">👥 Clientes</button>
+    <button class="nav-btn" onclick="showSection('pedidos')">📄 Pedidos</button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- SECCIÓN PRODUCTOS -->
+    <div id="productos" class="section active">
+        <h1>Gestión de Productos</h1>
+
+        <!-- Formulario Crear/Actualizar Producto -->
+        <div class="form-container">
+            <h3 id="formTitle">Nuevo Producto</h3>
+            <form id="formProducto">
+                <!-- Campo oculto para el ID en caso de edición -->
+                <input type="hidden" id="prodId">
+
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="prodNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Precio:</label>
+                    <input type="number" id="prodPrecio" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock:</label>
+                    <input type="number" id="prodStock" required>
+                </div>
+                <button type="submit" class="action-btn" id="submitButton">Guardar Producto</button>
+                <button type="button" class="delete-btn" id="cancelButton" onclick="resetForm()" style="display: none; margin-left: 10px;">Cancelar Edición</button>
+            </form>
+        </div>
+
+        <!-- Búsqueda de Producto por ID (Nuevo Requisito) -->
+        <div class="form-container" style="max-width: 400px;">
+            <h3>Buscar Producto por ID</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="searchId" placeholder="Ingrese ID del Producto" style="flex: 1;" min="1">
+                <button type="button" class="action-btn" onclick="buscarProductoPorId()">Buscar</button>
+            </div>
+            <!-- Contenedor para mostrar el resultado de la búsqueda -->
+            <div id="resultadoBusqueda">
+                <p>Resultado:</p>
+            </div>
+        </div>
+
+        <!-- Tabla Productos (Listar Productos - Requisito b) -->
+        <h3>Listado de Productos</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="tablaProductosBody">
+            <!-- JS llenará esto -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECCIÓN CLIENTES (Sin modificar) -->
+    <div id="clientes" class="section">
+        <h1>Gestión de Clientes</h1>
+
+        <!-- Formulario Crear Cliente -->
+        <div class="form-container">
+            <h3>Nuevo Cliente</h3>
+            <form id="formCliente">
+                <div class="form-group">
+                    <label>Nombre Completo:</label>
+                    <input type="text" id="cliNombre" required>
+                </div>
+                <button type="submit" class="action-btn">Guardar Cliente</button>
+            </form>
+        </div>
+
+        <!-- Tabla Clientes -->
+        <h3>Listado de Clientes</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="tablaClientesBody">
+            <!-- JS llenará esto -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECCIÓN PEDIDOS (Sin modificar) -->
+    <div id="pedidos" class="section">
+        <h1>Gestión de Pedidos</h1>
+
+        <!-- Formulario Crear Pedido -->
+        <div class="form-container">
+            <h3>Realizar Nuevo Pedido</h3>
+            <form id="formCrearPedido">
+                <!-- Select de Clientes -->
+                <div class="form-group">
+                    <label for="pedidoClienteId">Cliente:</label>
+                    <select id="pedidoClienteId" required>
+                        <option value="" disabled selected>Selecciona un cliente...</option>
+                    </select>
+                </div>
+
+                <h4>Productos a Pedir</h4>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <!-- Select de Productos -->
+                    <select id="productoSelector" style="flex: 3;" required>
+                        <option value="" disabled selected>Selecciona un producto...</option>
+                    </select>
+                    <!-- Cantidad Input -->
+                    <input type="number" id="cantidadPedido" placeholder="Cantidad" min="1" value="1" style="flex: 1; text-align: center;">
+                    <!-- Botón Agregar -->
+                    <button type="button" class="action-btn" onclick="agregarProductoAPedido()" style="flex: 0 0 50px;">+</button>
+                </div>
+
+                <!-- Tabla de Detalles del Pedido Temporal (Carrito) -->
+                <table style="margin-top: 15px;">
+                    <thead>
+                    <tr>
+                        <th>ID Producto</th>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                        <th>Eliminar</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tablaDetallesPedidoBody">
+                    <!-- Detalles del pedido temporal -->
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL:</td>
+                        <td id="pedidoTotalTemp" style="font-weight: bold;">$0.00</td>
+                        <td></td>
+                    </tr>
+                    </tfoot>
+                </table>
+
+                <button type="submit" class="action-btn" style="margin-top: 20px;">Confirmar Pedido</button>
+            </form>
+        </div>
+
+        <h3 style="margin-top: 40px;">Listado de Pedidos Existentes</h3>
+
+        <!-- Tabla de Pedidos -->
+        <table>
+            <thead>
+            <tr>
+                <th>ID Pedido</th>
+                <th>Cliente ID</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="tablaPedidosBody">
+            <!-- JS llenará esto -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // URL base de la API (Asumo que está corriendo en el puerto 8080 localmente)
+    const API_URL = "http://localhost:8080";
+
+    // Variables globales para almacenar datos y el carrito
+    let ALL_PRODUCTS = [];
+    let ALL_CLIENTS = [];
+    let CART_ITEMS = []; // { productoId, nombre, cantidad, precio, stockDisponible }
+
+    // --- MANEJO DE MENSAJES ---
+    function showMessage(message, type = 'success') {
+        const msgBox = document.getElementById('messageBox');
+
+        // Función auxiliar para obtener variables CSS (necesaria porque varFromCss no existe en el scope global)
+        function getCssVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        msgBox.textContent = message;
+        msgBox.style.display = 'block';
+        msgBox.style.backgroundColor = type === 'success' ? getCssVar('--success-color') : type === 'error' ? getCssVar('--danger-color') : getCssVar('--warning-color');
+
+        setTimeout(() => {
+            msgBox.style.display = 'none';
+        }, 3000);
+    }
+
+    // --- NAVEGACIÓN (Requisito f: Volver al menú principal) ---
+    function showSection(sectionId) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+        // Mostrar la seleccionada
+        document.getElementById(sectionId).classList.add('active');
+        document.querySelector(`.nav-btn[onclick*="${sectionId}"]`).classList.add('active');
+
+        // Cargar datos según la sección
+        if(sectionId === 'productos') loadProductos();
+        if(sectionId === 'clientes') loadClientes();
+        if(sectionId === 'pedidos') {
+            loadClientesForOrder();
+            loadProductosForOrder();
+            loadPedidos();
+        }
+    }
+
+    // --- LÓGICA PRODUCTOS (Requisito a, b, d, e) ---
+
+    // Requisito b: Listar Productos
+    async function loadProductos() {
+        try {
+            const response = await fetch(`${API_URL}/productos`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            ALL_PRODUCTS = await response.json();
+
+            const tbody = document.getElementById('tablaProductosBody');
+            tbody.innerHTML = '';
+
+            ALL_PRODUCTS.forEach(prod => {
+                // Se agrega el botón "Editar" y se llama a prepareUpdateForm
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${prod.id}</td>
+                        <td>${prod.nombre}</td>
+                        <td>$${prod.precio.toFixed(2)}</td>
+                        <td>${prod.stock}</td>
+                        <td>
+                            <button class="edit-btn" onclick="prepareUpdateForm(${prod.id})">Editar</button>
+                            <button class="delete-btn" onclick="deleteProducto(${prod.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            // Resetear el formulario a modo "Crear" después de listar
+            resetForm();
+        } catch (error) {
+            console.error("Error cargando productos:", error);
+            showMessage("Error de conexión con el Backend (Productos).", 'error');
+        }
+    }
+
+    // Manejador de Submit (Crea o Actualiza)
+    document.getElementById('formProducto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('prodId').value;
+
+        const producto = {
+            id: id ? parseInt(id) : null,
+            nombre: document.getElementById('prodNombre').value,
+            // Asegura que los valores se envíen como números correctos
+            precio: parseFloat(document.getElementById('prodPrecio').value),
+            stock: parseInt(document.getElementById('prodStock').value)
+        };
+
+        if (id) {
+            // Requisito d: Actualizar Producto
+            await updateProducto(producto);
+        } else {
+            // Requisito a: Agregar Producto
+            await createProducto(producto);
+        }
+    });
+
+    // Función para crear un producto
+    async function createProducto(producto) {
+        try {
+            const response = await fetch(`${API_URL}/productos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(producto)
+            });
+            if (!response.ok) throw new Error('Error al crear producto');
+
+            showMessage('Producto creado exitosamente.', 'success');
+            loadProductos();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('No se pudo guardar el producto.', 'error');
+        }
+    }
+
+    // Función para actualizar un producto
+    async function updateProducto(producto) {
+        try {
+            const response = await fetch(`${API_URL}/productos/${producto.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(producto)
+            });
+            if (!response.ok) throw new Error('Error al actualizar producto');
+
+            showMessage('Producto actualizado exitosamente.', 'success');
+            loadProductos(); // Recargar la lista
+            resetForm(); // Volver al modo "Crear"
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('No se pudo actualizar el producto.', 'error');
+        }
+    }
+
+    // Función para preparar el formulario en modo Actualizar
+    function prepareUpdateForm(id) {
+        const product = ALL_PRODUCTS.find(p => p.id === id);
+        if (product) {
+            document.getElementById('prodId').value = product.id;
+            document.getElementById('prodNombre').value = product.nombre;
+            document.getElementById('prodPrecio').value = product.precio;
+            document.getElementById('prodStock').value = product.stock;
+
+            // Cambiar título y botón
+            document.getElementById('formTitle').textContent = `Editar Producto #${id}`;
+            document.getElementById('submitButton').textContent = 'Guardar Cambios';
+            document.getElementById('cancelButton').style.display = 'inline-block';
+            document.getElementById('submitButton').classList.remove('action-btn');
+            document.getElementById('submitButton').classList.add('edit-btn');
+
+            showMessage(`Cargando datos del producto ${id} para edición.`, 'warning');
+        } else {
+            showMessage('Producto no encontrado.', 'error');
+        }
+    }
+
+    // Función para resetear el formulario a modo "Crear"
+    function resetForm() {
+        document.getElementById('formProducto').reset();
+        document.getElementById('prodId').value = '';
+        document.getElementById('formTitle').textContent = 'Nuevo Producto';
+        document.getElementById('submitButton').textContent = 'Guardar Producto';
+        document.getElementById('cancelButton').style.display = 'none';
+        document.getElementById('submitButton').classList.add('action-btn');
+        document.getElementById('submitButton').classList.remove('edit-btn');
+    }
+
+    // Requisito e: Eliminar Producto
+    async function deleteProducto(id) {
+        try {
+            // Eliminamos sin confirmación por restricción de alert()/confirm()
+            const response = await fetch(`${API_URL}/productos/${id}`, { method: 'DELETE' });
+            if (!response.ok) {
+                // Manejo de error específico si el producto está en uso
+                if (response.status === 409 || response.status === 400) {
+                     const errorText = await response.text();
+                     throw new Error(errorText || 'El producto está asociado a un pedido y no puede eliminarse.');
+                }
+                throw new Error('Error al eliminar producto');
+            }
+            showMessage('Producto eliminado exitosamente.', 'success');
+            loadProductos();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage(error.message || 'No se pudo eliminar el producto.', 'error');
+        }
+    }
+
+    // Requisito c: Buscar Producto por ID
+    async function buscarProductoPorId() {
+        const searchId = document.getElementById('searchId').value;
+        const resultDiv = document.getElementById('resultadoBusqueda');
+        resultDiv.innerHTML = '<p>Resultado:</p>'; // Limpiar resultados anteriores
+
+        if (!searchId) {
+            showMessage("Ingrese un ID para buscar.", 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/productos/${searchId}`);
+            if (response.status === 404) {
+                showMessage(`Producto con ID ${searchId} no encontrado.`, 'error');
+                resultDiv.innerHTML += `<p style="color: var(--danger-color);">ID ${searchId} no encontrado.</p>`;
+                return;
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const prod = await response.json();
+
+            resultDiv.innerHTML += `
+                <div class="busqueda-item"><strong>ID:</strong> ${prod.id}</div>
+                <div class="busqueda-item"><strong>Nombre:</strong> ${prod.nombre}</div>
+                <div class="busqueda-item"><strong>Precio:</strong> $${prod.precio.toFixed(2)}</div>
+                <div class="busqueda-item"><strong>Stock:</strong> ${prod.stock}</div>
+                <div class="busqueda-item"><button class="edit-btn" onclick="prepareUpdateForm(${prod.id})">Editar este Producto</button></div>
+            `;
+            showMessage(`Producto #${prod.id} encontrado.`, 'success');
+
+        } catch (error) {
+            console.error("Error buscando producto:", error);
+            showMessage(error.message || "Error al buscar el producto por ID.", 'error');
+        }
+    }
+
+
+    // --- LÓGICA CLIENTES (Mantenida) ---
+    async function loadClientes() {
+        try {
+            const response = await fetch(`${API_URL}/clientes`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            ALL_CLIENTS = await response.json();
+
+            const tbody = document.getElementById('tablaClientesBody');
+            tbody.innerHTML = '';
+
+            ALL_CLIENTS.forEach(cli => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${cli.id}</td>
+                        <td>${cli.nombre}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteCliente(${cli.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Error cargando clientes:", error);
+            showMessage("Error cargando clientes.", 'error');
+        }
+    }
+
+    document.getElementById('formCliente').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const cliente = {
+            nombre: document.getElementById('cliNombre').value
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/clientes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cliente)
+            });
+            if (!response.ok) throw new Error('Error creating client');
+
+            document.getElementById('formCliente').reset();
+            showMessage('Cliente creado exitosamente.', 'success');
+            loadClientes();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('No se pudo guardar el cliente.', 'error');
+        }
+    });
+
+    async function deleteCliente(id) {
+        try {
+            const response = await fetch(`${API_URL}/clientes/${id}`, { method: 'DELETE' });
+             if (!response.ok) {
+                if (response.status === 409 || response.status === 400) {
+                     const errorText = await response.text();
+                     throw new Error(errorText || 'El cliente tiene pedidos asociados y no puede eliminarse.');
+                }
+                throw new Error('Error deleting client');
+            }
+            showMessage('Cliente eliminado exitosamente.', 'success');
+            loadClientes();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage(error.message || 'No se pudo eliminar el cliente.', 'error');
+        }
+    }
+
+    // --- LÓGICA PEDIDOS (Mantenida) ---
+
+    // Función para llenar el selector de clientes en el formulario de pedidos
+    async function loadClientesForOrder() {
+        if (ALL_CLIENTS.length === 0) {
+            try {
+                const response = await fetch(`${API_URL}/clientes`);
+                ALL_CLIENTS = await response.json();
+            } catch (e) {
+                console.error("Error al cargar clientes para pedido:", e);
+                return;
+            }
+        }
+
+        const select = document.getElementById('pedidoClienteId');
+        select.innerHTML = '<option value="" disabled selected>Selecciona un cliente...</option>';
+        ALL_CLIENTS.forEach(cli => {
+            select.innerHTML += `<option value="${cli.id}">${cli.id} - ${cli.nombre}</option>`;
+        });
+    }
+
+    // Función para llenar el selector de productos en el formulario de pedidos
+    async function loadProductosForOrder() {
+         if (ALL_PRODUCTS.length === 0) {
+            try {
+                const response = await fetch(`${API_URL}/productos`);
+                ALL_PRODUCTS = await response.json();
+            } catch (e) {
+                console.error("Error al cargar productos para pedido:", e);
+                return;
+            }
+        }
+
+        const select = document.getElementById('productoSelector');
+        select.innerHTML = '<option value="" disabled selected>Selecciona un producto...</option>';
+        ALL_PRODUCTS.forEach(prod => {
+            // Se usa toFixed(2) para asegurar que el precio siempre tenga dos decimales
+            select.innerHTML += `<option value="${prod.id}" data-price="${prod.precio.toFixed(2)}" data-stock="${prod.stock}">
+                ${prod.nombre} ($${prod.precio.toFixed(2)}, Stock: ${prod.stock})
+            </option>`;
+        });
+    }
+
+    // Función para agregar un producto al carrito (CART_ITEMS)
+    function agregarProductoAPedido() {
+        const selector = document.getElementById('productoSelector');
+        const cantidadInput = document.getElementById('cantidadPedido');
+
+        const productoId = parseInt(selector.value);
+        const cantidad = parseInt(cantidadInput.value);
+
+        if (!productoId || isNaN(cantidad) || cantidad <= 0) {
+            showMessage("Por favor, selecciona un producto y una cantidad válida.", 'error');
+            return;
+        }
+
+        const selectedOption = selector.options[selector.selectedIndex];
+        const nombre = selectedOption.text.split('(')[0].trim();
+        const precio = parseFloat(selectedOption.getAttribute('data-price'));
+        const stockDisponible = parseInt(selectedOption.getAttribute('data-stock'));
+
+        // Si el producto ya está en el carrito, actualiza la cantidad
+        const existingItemIndex = CART_ITEMS.findIndex(item => item.productoId === productoId);
+
+        if (existingItemIndex !== -1) {
+            const newQuantity = CART_ITEMS[existingItemIndex].cantidad + cantidad;
+            if (newQuantity > stockDisponible) {
+                 showMessage(`Stock insuficiente. El total de ${nombre} en el carrito no puede exceder ${stockDisponible}.`, 'error');
+                 return;
+            }
+            CART_ITEMS[existingItemIndex].cantidad = newQuantity;
+        } else {
+            if (cantidad > stockDisponible) {
+                showMessage(`Stock insuficiente. Solo quedan ${stockDisponible} unidades de ${nombre}.`, 'error');
+                return;
+            }
+            // Si es un producto nuevo, añádelo
+            CART_ITEMS.push({
+                productoId: productoId,
+                nombre: nombre,
+                cantidad: cantidad,
+                precio: precio,
+                stockDisponible: stockDisponible
+            });
+        }
+
+        cantidadInput.value = 1; // Resetear cantidad
+        renderCart();
+    }
+
+    // Función para eliminar un producto del carrito
+    function eliminarItemCarrito(productoId) {
+        CART_ITEMS = CART_ITEMS.filter(item => item.productoId !== productoId);
+        renderCart();
+    }
+
+    // Función para renderizar el carrito en la tabla de detalles
+    function renderCart() {
+        const tbody = document.getElementById('tablaDetallesPedidoBody');
+        const totalDisplay = document.getElementById('pedidoTotalTemp');
+        tbody.innerHTML = '';
+        let total = 0;
+
+        CART_ITEMS.forEach(item => {
+            const subtotal = item.cantidad * item.precio;
+            total += subtotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.productoId}</td>
+                    <td>${item.nombre}</td>
+                    <td>${item.cantidad}</td>
+                    <td>$${item.precio.toFixed(2)}</td>
+                    <td>$${subtotal.toFixed(2)}</td>
+                    <td>
+                        <button class="delete-btn" onclick="eliminarItemCarrito(${item.productoId})">X</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        totalDisplay.textContent = `$${total.toFixed(2)}`;
+    }
+
+    // Manejar el envío del formulario de pedido
+    document.getElementById('formCrearPedido').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const clienteId = document.getElementById('pedidoClienteId').value;
+
+        if (!clienteId) {
+            showMessage("Debe seleccionar un cliente.", 'error');
+            return;
+        }
+
+        if (CART_ITEMS.length === 0) {
+            showMessage("El pedido no puede estar vacío. Agregue productos.", 'error');
+            return;
+        }
+
+        // Construir el PedidoCreacionDTO esperado por el backend
+        const pedidoData = {
+            clienteId: parseInt(clienteId),
+            detalles: CART_ITEMS.map(item => ({
+                productoId: item.productoId,
+                cantidad: item.cantidad
+            }))
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/pedidos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pedidoData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                // El backend maneja errores de stock y devuelve un mensaje útil
+                throw new Error(errorText || 'Error desconocido al crear el pedido.');
+            }
+
+            const nuevoPedido = await response.json();
+            showMessage(`Pedido #${nuevoPedido.id} creado exitosamente. Total: $${nuevoPedido.total.toFixed(2)}.`, 'success');
+
+            // Resetear el formulario y el carrito
+            document.getElementById('formCrearPedido').reset();
+            CART_ITEMS = [];
+            renderCart();
+            loadPedidos(); // Recargar la lista de pedidos
+            loadProductos(); // Recargar la lista de productos para ver el stock actualizado
+        } catch (error) {
+            console.error('Error al crear pedido:', error);
+            showMessage(`Error al crear pedido: ${error.message}`, 'error');
+        }
+    });
+
+    // Función para cargar y mostrar la lista de pedidos
+    async function loadPedidos() {
+        try {
+            const response = await fetch(`${API_URL}/pedidos`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const pedidos = await response.json();
+
+            const tbody = document.getElementById('tablaPedidosBody');
+            tbody.innerHTML = '';
+
+            pedidos.forEach(p => {
+                // Asegúrate de usar .toFixed(2) para el total
+                const fecha = new Date(p.fecha).toLocaleDateString('es-ES', {
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                const estado = p.activo ? '<span style="color: var(--success-color);">Activo</span>' : '<span style="color: var(--danger-color);">Cancelado</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td>${p.cliente ? p.cliente.id : 'N/A'}</td>
+                        <td>${fecha}</td>
+                        <td>$${p.total.toFixed(2)}</td>
+                        <td>${estado}</td>
+                        <td>
+                            ${p.activo ? `<button class="delete-btn" onclick="cancelarPedido(${p.id})">Cancelar</button>` : '---'}
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Error cargando pedidos:", error);
+            showMessage("Error cargando pedidos.", 'error');
+        }
+    }
+
+    // Función para cancelar un pedido (llama a PUT /pedidos/cancelar/{id})
+    async function cancelarPedido(id) {
+        try {
+            const response = await fetch(`${API_URL}/pedidos/cancelar/${id}`, { method: 'PUT' });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Error al intentar cancelar el pedido.');
+            }
+
+            showMessage(`Pedido #${id} cancelado exitosamente.`, 'success');
+            loadPedidos();
+            loadProductos(); // Recargar productos porque el stock se recupera
+        } catch (error) {
+            console.error('Error al cancelar pedido:', error);
+            showMessage(`No se pudo cancelar el pedido: ${error.message}`, 'error');
+        }
+    }
+
+    // Inicializar la carga de la primera sección al cargar la página
+    window.onload = () => {
+        showSection('productos');
+        // Inicializar el div de búsqueda vacío
+        document.getElementById('resultadoBusqueda').innerHTML = '<p>Resultado: Ingrese un ID para buscar.</p>';
+    };
+
+</script>
+</body>
+</html>
